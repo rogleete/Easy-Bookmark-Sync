@@ -69,17 +69,25 @@
     </p>
     <ol start="3">
       <li>
-        Under <strong>Authorized redirect URIs</strong>, add the exact URI
-        shown on the extension's Options page (right click the extension
-        icon → Options, or the gear/settings link in the popup). It looks
-        like <code>https://&lt;extension-id&gt;.chromiumapp.org/</code>.
+        Under <strong>Authorized redirect URIs</strong>, add both of these
+        exact URIs (one per line) - they're fixed permanently now, tied to
+        the published listings, so this step won't need revisiting later:
+        <br><br>
+        <code>https://ohgafdieafmgfcahebkcbnpbnjopglfp.chromiumapp.org/</code> (Chrome Web Store)<br>
+        <code>https://iplgoihgbngdhmcbacjakppljbeepchk.chromiumapp.org/</code> (Edge Add-ons)
       </li>
       <li>
-        Using this in more than one browser? Add each browser's redirect
-        URI as its own line under the same OAuth client - Chrome and Edge
-        generate different extension IDs even from the same folder, but one
-        Client ID can hold multiple redirect URIs, so you still only need
-        one Client ID total.
+        Add both now even if you're only using one browser today - it
+        saves coming back to add the other one later. (If you're loading
+        the extension unpacked in Developer mode instead of installing it
+        from a store, its ID - and redirect URI - will be different; the
+        extension's Options page always shows the exact one to use for
+        whatever copy you're running.)
+      </li>
+      <li>
+        One Client ID can hold multiple redirect URIs, so both of the
+        above (plus any unpacked dev ID) can live on this same OAuth
+        client - no need for separate Client IDs per browser.
       </li>
       <li>Save, then copy the Client ID (ends in <code>.apps.googleusercontent.com</code>).</li>
     </ol>
@@ -94,9 +102,9 @@
     <h2>Part 5: Paste the Client ID</h2>
     <ol>
       <li>Right-click the toolbar icon → <strong>Options</strong> (or open it from the popup's setup screen).</li>
-      <li>Copy the redirect URI shown there, and go add it to your OAuth client in Google Cloud Console (Part 3, step 3).</li>
+      <li>The redirect URI shown there should already match one of the two URIs you added in Part 3 (Chrome Web Store or Edge Add-ons) - nothing more to add there if so.</li>
       <li>Paste the Client ID from Part 3 into the field on the Options page and click <strong>Save</strong>.</li>
-      <li>If you loaded the extension in a second browser, open its Options page too, copy that browser's redirect URI, add it to the same OAuth client back in Google Cloud Console (Part 3, step 3), then paste the same Client ID into that browser's Options page as well.</li>
+      <li>Repeat on a second browser if you're using one - same Client ID, since both stores' redirect URIs are already on that OAuth client from Part 3.</li>
     </ol>
     <p class="shots">
       <img src="https://github.com/user-attachments/assets/e461a559-f6cb-40e5-9449-b4ec6fe0e163" alt="Right-click the toolbar icon to find Options">

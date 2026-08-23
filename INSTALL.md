@@ -52,14 +52,20 @@ right click the toolbar icon → Options → "View full setup instructions".)
 2. Application type: **Web application** (not "Chrome Extension" - that
    older client type isn't needed).<br><br>
    <img width="650" height="1119" alt="install14-clientid" src="https://github.com/user-attachments/assets/3eefe644-78fc-4af0-97bd-b0dbfeddd58f" /><br>
-3. Under **Authorized redirect URIs**, you'll add a URI shown on the
-   extension's Options page in Part 5 below - come back to this step after
-   loading the extension once. It looks like
-   `https://<extension-id>.chromiumapp.org/`.<br>
-4. Using this in more than one browser? Add each browser's redirect URI as
-   its own line under the *same* OAuth client. Chrome and Edge generate
-   different extension IDs even from the same folder, but one Client ID can
-   hold multiple redirect URIs, so you still only need one Client ID total.
+3. Under **Authorized redirect URIs**, add both of these exact URIs (one
+   per line) - they're fixed permanently now, tied to the published
+   listings, so this step won't need revisiting later:<br><br>
+   `https://ohgafdieafmgfcahebkcbnpbnjopglfp.chromiumapp.org/` (Chrome Web Store)<br>
+   `https://iplgoihgbngdhmcbacjakppljbeepchk.chromiumapp.org/` (Edge Add-ons)<br><br>
+   Add both now even if you're only using one browser today - it saves
+   coming back to add the other one later. (If you're loading the
+   extension unpacked in Developer mode instead of installing it from a
+   store, its ID - and redirect URI - will be different; the extension's
+   Options page always shows the exact one to use for whatever copy
+   you're running.)
+4. One Client ID can hold multiple redirect URIs, so both of the above
+   (plus any unpacked dev ID) can live on this same OAuth client - no need
+   for separate Client IDs per browser.
 5. Save, then copy the Client ID (ends in `.apps.googleusercontent.com`).<br><br>
 <img width="586" height="312" alt="install15-clientidvalue" src="https://github.com/user-attachments/assets/f1752d22-0aff-44c2-98dc-c0c1c44241f0" /><br>
 
@@ -75,13 +81,14 @@ unpacked**, select the same folder.
 
 1. Right-click the toolbar icon → **Options** (or open it from the popup's
    setup screen).
-2. Copy the redirect URI shown there, and go add it to your OAuth client
-   in Google Cloud Console (Part 3, step 3).
+2. The redirect URI shown there should already match one of the two URIs
+   you added in Part 3 (Chrome Web Store or Edge Add-ons) - nothing more
+   to add there if so.
 3. Paste the Client ID from Part 3 into the field on the Options page and
    click **Save**.
-4. Repeat for a second browser if you're using one: open its Options page,
-   grab its redirect URI, add that to the same OAuth client, then paste
-   the same Client ID in.<br><br>
+4. Repeat on a second browser if you're using one - same Client ID, since
+   both stores' redirect URIs are already on that OAuth client from
+   Part 3.<br><br>
 <img width="373" height="343" alt="install16-menu" src="https://github.com/user-attachments/assets/e461a559-f6cb-40e5-9449-b4ec6fe0e163" /><br>
 <img width="371" height="467" alt="install17-settings" src="https://github.com/user-attachments/assets/bf126b6f-27b0-4c7b-9f38-3d364df39d6e" /><br>
 <img width="662" height="747" alt="install18-setup" src="https://github.com/user-attachments/assets/29503f09-8a44-421f-ae9c-5afc7e9abf8b" /><br>

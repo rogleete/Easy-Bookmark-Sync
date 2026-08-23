@@ -59,13 +59,20 @@ Options page.
    client ID**.
 2. Application type: **Web application** (not "Chrome Extension" - that
    older client type isn't needed and just adds confusion).
-3. Under **Authorized redirect URIs**, add the exact URI shown on the
-   extension's Options page (right-click the extension icon → Options).
-   It looks like `https://<extension-id>.chromiumapp.org/`.
-4. Using this in more than one browser? Add each browser's redirect URI as
-   its own line under the same OAuth client - Chrome and Edge generate
-   different extension IDs, but one Client ID can hold multiple redirect
-   URIs, so you still only need one Client ID total.
+3. Under **Authorized redirect URIs**, add both of these exact URIs (one
+   per line) - they're fixed permanently now, tied to the published
+   listings, so this step won't need revisiting later:
+   - `https://ohgafdieafmgfcahebkcbnpbnjopglfp.chromiumapp.org/` (Chrome Web Store)
+   - `https://iplgoihgbngdhmcbacjakppljbeepchk.chromiumapp.org/` (Edge Add-ons)
+
+   Add both now even if you're only using one browser today. (If you're
+   loading the extension unpacked in Developer mode instead of installing
+   it from a store, its ID - and redirect URI - will be different; the
+   extension's Options page always shows the exact one to use for
+   whatever copy you're running.)
+4. One Client ID can hold multiple redirect URIs, so both of the above
+   (plus any unpacked dev ID) can live on this same OAuth client - no need
+   for separate Client IDs per browser.
 5. Save, then copy the Client ID (ends in `.apps.googleusercontent.com`).
 
 ### Part 4: Load the extension
@@ -79,13 +86,14 @@ unpacked**, select the same folder.
 ### Part 5: Paste the Client ID
 
 1. Right-click the toolbar icon → **Options**.
-2. Copy the redirect URI shown there, and add it to your OAuth client in
-   Google Cloud Console (Part 3, step 3).
+2. The redirect URI shown there should already match one of the two URIs
+   you added in Part 3 (Chrome Web Store or Edge Add-ons) - nothing more
+   to add there if so.
 3. Paste the Client ID from Part 3 into the field on the Options page and
    click **Save**.
-4. Repeat for a second browser if you're using one: open its Options page,
-   grab its redirect URI, add it to the same OAuth client, then paste the
-   same Client ID in.
+4. Repeat on a second browser if you're using one - same Client ID, since
+   both stores' redirect URIs are already on that OAuth client from
+   Part 3.
 
 ### Part 6: First run
 

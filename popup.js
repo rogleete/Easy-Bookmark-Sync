@@ -14,6 +14,9 @@ const signOutButton = document.getElementById('signOutButton');
 const openOptionsButton = document.getElementById('openOptionsButton');
 const openOptionsButtonBottom = document.getElementById('openOptionsButtonBottom');
 const clientIdNotice = document.getElementById('clientIdNotice');
+const manualBackupLink = document.getElementById('manualBackupLink');
+
+manualBackupLink.href = chrome.runtime.getURL('backup.html');
 
 openOptionsButton.addEventListener('click', () => {
   chrome.runtime.openOptionsPage();

@@ -17,7 +17,8 @@ const DEFAULT_STATE = {
   lastSyncTime: null,
   lastStats: { synced: 0, total: 0 },
   dirty: false, // master only - true means a real bookmark change happened since the last upload
-  lastRemoteModifiedTime: null // Drive's modifiedTime for the file as of the last real download
+  lastRemoteModifiedTime: null, // Drive's modifiedTime for the file as of the last real download
+  backupsFolderId: null
 };
 
 let isSyncing = false;
@@ -191,6 +192,115 @@ async function uploadBookmarksJson(token, folderId, fileId, jsonString) {
 async function downloadBookmarksJson(token, fileId) {
   const res = await driveFetch(token, `/drive/v3/files/${fileId}?alt=media`);
   return res.text();
+}
+
+// ---------- manual backups (separate from the live sync file) ----------
+// these live in their own "Backups" subfolder so they never get touched
+// by the regular master/destination sync, which only ever reads/writes
+// the one live bookmarks.json file
+
+async function findBackupsFolder(token, parentId) {
+  const q = encodeURIComponent(
+    `name='Backups' and mimeType='application/vnd.google-apps.folder' and trashed=false and '${parentId}' in parents`
+  );
+  const res = await driveFetch(token, `/drive/v3/files?q=${q}&fields=files(id,name)`);
+  const data = await res.json();
+  return data.files && data.files.length ? data.files[0].id : null;
+}
+
+async function createBackupsFolder(token, parentId) {
+  const res = await driveFetch(token, '/drive/v3/files?fields=id', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: 'Backups', mimeType: 'application/vnd.google-apps.folder', parents: [parentId] })
+  });
+  const data = await res.json();
+  return data.id;
+}
+
+async function getOrCreateBackupsFolder(token) {
+  const state = await getState();
+  if (state.backupsFolderId) {
+    return state.backupsFolderId;
+  }
+  const mainFolderId = state.folderId || (await getOrCreateFolder(token));
+  let backupsFolderId = await findBackupsFolder(token, mainFolderId);
+  if (!backupsFolderId) {
+    backupsFolderId = await createBackupsFolder(token, mainFolderId);
+  }
+  await setState({ backupsFolderId });
+  return backupsFolderId;
+}
+
+async function listBackupFiles(token) {
+  const backupsFolderId = await getOrCreateBackupsFolder(token);
+  const q = encodeURIComponent(`'${backupsFolderId}' in parents and trashed=false`);
+  const res = await driveFetch(
+    token,
+    `/drive/v3/files?q=${q}&fields=files(id,name,createdTime,properties)&orderBy=createdTime desc`
+  );
+  const data = await res.json();
+  return (data.files || []).map((f) => ({
+    id: f.id,
+    name: f.name,
+    createdTime: f.createdTime,
+    bookmarkCount: f.properties && f.properties.bookmarkCount ? parseInt(f.properties.bookmarkCount, 10) : null
+  }));
+}
+
+async function createBackupFile(token) {
+  const backupsFolderId = await getOrCreateBackupsFolder(token);
+  const tree = await getSerializedTree();
+  const total = countUrls(tree);
+  const jsonString = JSON.stringify(tree);
+
+  const now = new Date();
+  const stamp = now.toISOString().replace(/:/g, '-').split('.')[0];
+  const name = `Backup ${stamp} (${total} bookmarks).json`;
+
+  const metadata = {
+    name,
+    parents: [backupsFolderId],
+    properties: { bookmarkCount: String(total) }
+  };
+
+  const boundary = 'ebs-boundary-' + Date.now();
+  const body =
+    `--${boundary}\r\n` +
+    'Content-Type: application/json; charset=UTF-8\r\n\r\n' +
+    JSON.stringify(metadata) +
+    `\r\n--${boundary}\r\n` +
+    'Content-Type: application/json\r\n\r\n' +
+    jsonString +
+    `\r\n--${boundary}--`;
+
+  const res = await driveFetch(token, '/upload/drive/v3/files?uploadType=multipart', {
+    method: 'POST',
+    headers: { 'Content-Type': `multipart/related; boundary=${boundary}` },
+    body
+  });
+  const data = await res.json();
+  return { id: data.id, name, createdTime: now.toISOString(), bookmarkCount: total };
+}
+
+async function restoreBackupFile(token, fileId) {
+  const jsonString = await downloadBookmarksJson(token, fileId);
+  const tree = JSON.parse(jsonString);
+  const result = await restoreSerializedTree(tree);
+
+  // if this is the master browser, the local tree just changed underneath
+  // the live sync file - flag it dirty so the restored state gets pushed
+  // back up to the cloud on the next sync instead of getting overwritten
+  const state = await getState();
+  if (state.role === 'master') {
+    await setState({ dirty: true });
+  }
+
+  return result;
+}
+
+async function deleteBackupFile(token, fileId) {
+  await driveFetch(token, `/drive/v3/files/${fileId}`, { method: 'DELETE' });
 }
 
 // ---------- bookmark tree <-> plain JSON ----------
@@ -476,6 +586,65 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         await setState(DEFAULT_STATE);
         await chrome.alarms.clear('scheduledSync');
         sendResponse({ ok: true });
+        break;
+      }
+      case 'listBackups': {
+        try {
+          const token = await getValidToken(true);
+          const backups = await listBackupFiles(token);
+          sendResponse({ ok: true, backups });
+        } catch (err) {
+          sendResponse({ ok: false, error: err.message });
+        }
+        break;
+      }
+      case 'createBackup': {
+        if (isSyncing) {
+          sendResponse({ ok: false, error: 'A sync is currently in progress - try again in a moment' });
+          break;
+        }
+        isSyncing = true;
+        try {
+          const token = await getValidToken(true);
+          const backup = await createBackupFile(token);
+          sendResponse({ ok: true, backup });
+        } catch (err) {
+          sendResponse({ ok: false, error: err.message });
+        } finally {
+          isSyncing = false;
+        }
+        break;
+      }
+      case 'restoreBackup': {
+        if (isSyncing) {
+          sendResponse({ ok: false, error: 'A sync is currently in progress - try again in a moment' });
+          break;
+        }
+        const currentState = await getState();
+        if (currentState.role !== 'master') {
+          sendResponse({ ok: false, error: 'Restoring a backup is only available on the Master Sync Source browser' });
+          break;
+        }
+        isSyncing = true;
+        try {
+          const token = await getValidToken(true);
+          const result = await restoreBackupFile(token, message.fileId);
+          sendResponse({ ok: true, result });
+        } catch (err) {
+          sendResponse({ ok: false, error: err.message });
+        } finally {
+          isSyncing = false;
+        }
+        break;
+      }
+      case 'deleteBackup': {
+        try {
+          const token = await getValidToken(true);
+          await deleteBackupFile(token, message.fileId);
+          sendResponse({ ok: true });
+        } catch (err) {
+          sendResponse({ ok: false, error: err.message });
+        }
         break;
       }
       default:

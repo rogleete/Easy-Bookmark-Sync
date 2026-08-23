@@ -60,3 +60,15 @@ code {
 a {
   color: #2563eb;
 }
+
+.shots {
+  margin: 4px 0 20px 0;
+}
+
+.shots img {
+  max-width: 100%;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  display: block;
+  margin-bottom: 10px;
+}

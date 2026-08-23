@@ -118,6 +118,21 @@ Then on any other computer you want to pull bookmarks down to:
 - Only asks for permission to see files it creates in Drive
   (`drive.file` scope), not your whole Drive.
 
+## Manual backups
+
+Separate from the automatic sync, click **Manual Backup** at the bottom of
+the popup to open a page where you can:
+
+- Click **Generate a separate Backup** to save a timestamped snapshot of
+  every bookmark in this browser right now, into its own `Backups` folder
+  inside `EasyBookmarkSync` - untouched by the regular automatic sync.
+- Browse past backups (date and bookmark count shown for each) and delete
+  individual ones you don't need anymore.
+- Pick one from the dropdown and click **Restore selected backup** to
+  replace every current local bookmark with that snapshot. This is only
+  available on the **Master Sync Source** browser, and asks for
+  confirmation first since it can't be undone.
+
 ## Troubleshooting
 
 - **Error 400: redirect_uri_mismatch** - the redirect URI on the Options

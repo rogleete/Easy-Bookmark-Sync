@@ -20,6 +20,9 @@ full details.
 - Realtime mode reacts to bookmark changes within a few seconds on the
   master browser, with a once-a-minute backstop check
 - Status and stats shown right in the popup (bookmarks synced / total)
+- Manual backups: separate, timestamped snapshots you create on demand,
+  stored in their own `Backups` folder untouched by the regular sync -
+  browse them, restore one, or delete individual ones any time
 - Only asks for the `drive.file` Google scope - it can only see files and
   folders it creates itself, not your whole Drive
 
@@ -119,6 +122,30 @@ Then on any other computer you want to pull bookmarks down to:
   cloud copy; destination overwrites local bookmarks.
 - Checks that find nothing new don't touch Drive or your bookmarks at all
   - a sync only actually happens when something real changed.
+
+## Manual backups
+
+Separate from the automatic master/destination sync, "Manual Backup" in
+the popup footer opens a full page where you can:
+
+- **Generate a separate Backup** - captures every bookmark in this browser
+  right now, uploaded as its own timestamped file in a `Backups` folder
+  inside `EasyBookmarkSync`, alongside a bookmark count.
+- **Browse and delete** - see every backup you've taken, with its date and
+  count, and delete individual ones permanently.
+- **Restore** - pick a backup from the dropdown and restore it. This
+  replaces every current local bookmark with what's in that snapshot and
+  can't be undone, so it asks for confirmation first. **Restoring is only
+  available on the Master Sync Source browser** - a destination browser's
+  bookmarks are just a mirror of the master, so restoring there wouldn't
+  do anything the master doesn't already control. If you restore on the
+  master, the restored state is also flagged to push up on the next
+  regular sync, so it becomes the new live copy instead of getting
+  overwritten again.
+
+These backups are completely separate from the live `bookmarks.json` file
+the automatic sync uses - creating, restoring, or deleting one never
+affects the regular sync, and vice versa.
 
 ## Troubleshooting
 

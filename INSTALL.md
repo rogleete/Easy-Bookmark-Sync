@@ -14,35 +14,54 @@ right click the toolbar icon → Options → "View full setup instructions".)
    account you want to sync bookmarks through.
 2. Create a new project (top left project dropdown → New Project). Name it
    whatever you like, e.g. "Bookmark Sync".
-3. Search the top bar for **Google Drive API** and click **Enable**.
+3. Search the top bar for **Google Drive API** and click **Enable**.<br><br>
+
+   <img width="950" height="203" alt="install1-newproject" src="https://github.com/user-attachments/assets/d2f9bc23-407a-4f56-abe8-753f7ad16955" /><br>
+   <img width="640" height="510" alt="setup2-NewProject" src="https://github.com/user-attachments/assets/cf424cad-c894-4894-9a76-b8e9daef5641" /><br>
+   <img width="455" height="55" alt="install3-selectproject" src="https://github.com/user-attachments/assets/a26aee56-e729-461c-9249-e67cd8bb3143" /><br>
+   <img width="598" height="164" alt="install4-driveapi" src="https://github.com/user-attachments/assets/36c7a462-453e-4f39-b2cd-97db00b99ad1" /><br>
+   <img width="528" height="235" alt="install4-driveapienable" src="https://github.com/user-attachments/assets/68acb464-b3be-4f6c-9ada-ac9c5b25c77d" /><br>
+
 
 ## Part 2: OAuth consent screen
 
-1. Go to **APIs & Services → OAuth consent screen**.
+1. Go to **APIs & Services → OAuth consent screen**.<br><br>
+<img width="318" height="305" alt="install6-oauthconsent" src="https://github.com/user-attachments/assets/c60c3d2b-d70a-4dc8-b8b7-17304d9b8d4d" /><br>
+
+   
 2. User type: **External** (Internal is fine too if you have a Workspace
    account).
 3. Fill in an app name and your email for the support/developer contact
-   fields. Everything else can stay blank.
-4. Scopes step: nothing to add manually.
-5. Test users step: add the Google account email you'll actually use with
+   fields. Everything else can stay blank.<br><br>
+   <img width="667" height="711" alt="install7-appinfo" src="https://github.com/user-attachments/assets/bbab2554-1297-4157-bdd1-1722014ee144" /><br>
+   <img width="641" height="495" alt="install8-audience" src="https://github.com/user-attachments/assets/3cb5a150-40c1-48db-9e51-f2f8b800bcc6" /><br>
+   <img width="639" height="219" alt="install9-contact" src="https://github.com/user-attachments/assets/2ebb8369-c40c-45ec-8805-87b19becbf26" /><br>
+5. Scopes step: nothing to add manually.
+6. Test users step: add the Google account email you'll actually use with
    the extension. While the app is in "Testing" mode, only accounts on this
-   list can sign in - normal for a personal tool.
+   list can sign in - normal for a personal tool.<br><br>
+   <img width="638" height="275" alt="install12-testusers" src="https://github.com/user-attachments/assets/cde73a31-d30d-4a29-9899-6be27a44e7dd" /><br>
+
 
 ## Part 3: OAuth Client ID
 
 1. Go to **APIs & Services → Credentials → Create Credentials → OAuth
-   client ID**.
+   client ID**.<br><br>
+   <img width="308" height="409" alt="install13-clients" src="https://github.com/user-attachments/assets/c7b91294-e3f5-4257-ab0e-64931def25d8" /><br>
+
 2. Application type: **Web application** (not "Chrome Extension" - that
-   older client type isn't needed).
+   older client type isn't needed).<br><br>
+   <img width="650" height="1119" alt="install14-clientid" src="https://github.com/user-attachments/assets/3eefe644-78fc-4af0-97bd-b0dbfeddd58f" /><br>
 3. Under **Authorized redirect URIs**, you'll add a URI shown on the
    extension's Options page in Part 5 below - come back to this step after
    loading the extension once. It looks like
-   `https://<extension-id>.chromiumapp.org/`.
+   `https://<extension-id>.chromiumapp.org/`.<br>
 4. Using this in more than one browser? Add each browser's redirect URI as
    its own line under the *same* OAuth client. Chrome and Edge generate
    different extension IDs even from the same folder, but one Client ID can
    hold multiple redirect URIs, so you still only need one Client ID total.
-5. Save, then copy the Client ID (ends in `.apps.googleusercontent.com`).
+5. Save, then copy the Client ID (ends in `.apps.googleusercontent.com`).<br><br>
+<img width="586" height="312" alt="install15-clientidvalue" src="https://github.com/user-attachments/assets/f1752d22-0aff-44c2-98dc-c0c1c44241f0" /><br>
 
 ## Part 4: Load the extension
 
@@ -52,7 +71,7 @@ right click the toolbar icon → Options → "View full setup instructions".)
 **Edge:** go to `edge://extensions`, turn on Developer mode, click **Load
 unpacked**, select the same folder.
 
-## Part 5: Paste the Client ID
+## Part 5: Paste the Client ID<br>
 
 1. Right-click the toolbar icon → **Options** (or open it from the popup's
    setup screen).
@@ -62,7 +81,10 @@ unpacked**, select the same folder.
    click **Save**.
 4. Repeat for a second browser if you're using one: open its Options page,
    grab its redirect URI, add that to the same OAuth client, then paste
-   the same Client ID in.
+   the same Client ID in.<br><br>
+<img width="373" height="343" alt="install16-menu" src="https://github.com/user-attachments/assets/e461a559-f6cb-40e5-9449-b4ec6fe0e163" /><br>
+<img width="371" height="467" alt="install17-settings" src="https://github.com/user-attachments/assets/bf126b6f-27b0-4c7b-9f38-3d364df39d6e" /><br>
+<img width="662" height="747" alt="install18-setup" src="https://github.com/user-attachments/assets/29503f09-8a44-421f-ae9c-5afc7e9abf8b" /><br>
 
 ## Part 6: First run
 

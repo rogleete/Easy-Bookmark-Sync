@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Easy Bookmark Sync - Setup Guide</title>
+  <link rel="stylesheet" href="install.css">
+</head>
+<body>
+  <div class="wrap">
+    <h1>Easy Bookmark Sync - Setup Guide</h1>
+    <p class="lead">
+      This extension talks directly to your own Google Drive - there's no
+      server in the middle. That means before it can work, you need a
+      (free) Google Cloud OAuth Client ID. It's about ten minutes, one time
+      only, and you don't need to touch any code - everything gets pasted
+      into the extension's Options page.
+    </p>
+
+    <h2>Part 1: Google Cloud project</h2>
+    <ol>
+      <li>Go to <a href="https://console.cloud.google.com/" target="_blank" rel="noopener">console.cloud.google.com</a> and sign in with the Google account you want to sync bookmarks through.</li>
+      <li>Create a new project (top left project dropdown → New Project). Name it whatever you like, e.g. "Bookmark Sync".</li>
+      <li>Search the top bar for <strong>Google Drive API</strong> and click <strong>Enable</strong>.</li>
+    </ol>
+
+    <h2>Part 2: OAuth consent screen</h2>
+    <ol>
+      <li>Go to <strong>APIs &amp; Services → OAuth consent screen</strong>.</li>
+      <li>User type: <strong>External</strong> (Internal is fine too if you have a Workspace account).</li>
+      <li>Fill in an app name and your email for the support/developer contact fields. Everything else can stay blank.</li>
+      <li>On the Scopes step, there's nothing to add manually.</li>
+      <li>On the Test users step, add the Google account email you'll actually use with the extension. While the app is in "Testing" mode, only accounts on this list can sign in - that's expected for a personal tool.</li>
+    </ol>
+
+    <h2>Part 3: OAuth Client ID</h2>
+    <ol>
+      <li>Go to <strong>APIs &amp; Services → Credentials → Create Credentials → OAuth client ID</strong>.</li>
+      <li>Application type: <strong>Web application</strong> (not "Chrome Extension" - that older client type isn't needed and just adds confusion).</li>
+      <li>
+        Under <strong>Authorized redirect URIs</strong>, add the exact URI
+        shown on the extension's Options page (right click the extension
+        icon → Options, or the gear/settings link in the popup). It looks
+        like <code>https://&lt;extension-id&gt;.chromiumapp.org/</code>.
+      </li>
+      <li>
+        Using this in more than one browser? Add each browser's redirect
+        URI as its own line under the same OAuth client - Chrome and Edge
+        generate different extension IDs even from the same folder, but one
+        Client ID can hold multiple redirect URIs, so you still only need
+        one Client ID total.
+      </li>
+      <li>Save, then copy the Client ID (ends in <code>.apps.googleusercontent.com</code>).</li>
+    </ol>
+
+    <h2>Part 4: Load the extension</h2>
+    <p><strong>Chrome:</strong> go to <code>chrome://extensions</code>, turn on Developer mode, click Load unpacked, select the extension folder.</p>
+    <p><strong>Edge:</strong> go to <code>edge://extensions</code>, turn on Developer mode, click Load unpacked, select the same folder.</p>
+
+    <h2>Part 5: Paste the Client ID</h2>
+    <ol>
+      <li>Open the extension's Options page (right-click the toolbar icon → Options).</li>
+      <li>Paste the Client ID from Part 3 into the field there and click Save.</li>
+      <li>If you loaded the extension in a second browser, open its Options page too, copy that browser's redirect URI, add it to the same OAuth client back in Google Cloud Console (Part 3, step 4), then paste the same Client ID into that browser's Options page as well.</li>
+    </ol>
+
+    <h2>Part 6: First run</h2>
+    <p>Do this on your <strong>master</strong> computer first (the one with the bookmarks you already have):</p>
+    <ol>
+      <li>Click the extension icon in the toolbar.</li>
+      <li>Check <strong>Master Sync Source</strong>.</li>
+      <li>Click <strong>Connect Google Account</strong> and approve access.</li>
+      <li>It creates an <code>EasyBookmarkSync</code> folder in Drive and does an initial upload.</li>
+    </ol>
+    <p>Then on any other computer you want to pull bookmarks down to:</p>
+    <ol>
+      <li>Load the extension there too (repeat Parts 4-5 for that browser if needed).</li>
+      <li>Click the extension icon, check <strong>Destination Sync</strong>.</li>
+      <li>Click <strong>Connect Google Account</strong> and sign in with the <em>same</em> Google account.</li>
+      <li>It pulls down whatever the master last uploaded, replacing local bookmarks.</li>
+    </ol>
+
+    <h2>How syncing behaves</h2>
+    <ul>
+      <li><strong>Master, Realtime:</strong> a bookmark change triggers a sync a few seconds later, plus a once-a-minute backstop check so nothing gets missed if the browser was closed when the change happened.</li>
+      <li><strong>Destination, Realtime:</strong> checks the cloud roughly once a minute. True instant push would need a server watching for changes, so this is the closest practical equivalent.</li>
+      <li>Every sync fully replaces the target - no merging. Master overwrites the cloud copy; destination overwrites local bookmarks.</li>
+      <li>The extension only has permission to see files it creates in Drive (the <code>drive.file</code> scope), not your whole Drive.</li>
+    </ul>
+
+    <h2>Troubleshooting</h2>
+    <ul>
+      <li><strong>Error 400: redirect_uri_mismatch</strong> - the redirect URI on the Options page doesn't exactly match one of the Authorized redirect URIs on your OAuth client. Double check for a missing trailing slash or http vs https.</li>
+      <li><strong>"No Google Client ID set yet"</strong> - paste one into the extension's Options page.</li>
+      <li><strong>Asks to sign in every single time</strong> - usually a mismatched redirect URI, or a browser profile blocking third-party cookies for accounts.google.com.</li>
+      <li><strong>"No bookmarks found in the cloud yet"</strong> on a destination browser - the master browser hasn't completed its first sync.</li>
+    </ul>
+  </div>
+</body>
+</html>

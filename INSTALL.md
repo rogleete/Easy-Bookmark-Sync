@@ -131,7 +131,9 @@ the popup to open a page where you can:
 - Pick one from the dropdown and click **Restore selected backup** to
   replace every current local bookmark with that snapshot. This is only
   available on the **Master Sync Source** browser, and asks for
-  confirmation first since it can't be undone.
+  confirmation first since it can't be undone.<br>
+  <img width="676" height="680" alt="settings-manualbackup" src="https://github.com/user-attachments/assets/42945640-a62e-43c1-9388-f3ecfaba2f99" />
+
 
 ## Troubleshooting
 

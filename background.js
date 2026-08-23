@@ -291,9 +291,28 @@ async function performSync(reason) {
   isSyncing = true;
   const state = await getState();
 
+  // only a user directly clicking "Sync now" (or Connect, which goes
+  // through authenticate() separately) is allowed to pop an interactive
+  // sign-in window. Anything background-triggered - the alarm or a
+  // bookmark change - only ever tries a silent refresh, and fails quietly
+  // if that doesn't work, instead of surprising someone with a Google
+  // sign-in tab they never asked for.
+  const allowInteractive = reason === 'manual';
+
   try {
     await updateStatus({ status: 'syncing' });
-    const token = await getValidToken(true);
+
+    let token;
+    try {
+      token = await getValidToken(allowInteractive);
+    } catch (authError) {
+      await updateStatus({
+        status: 'error',
+        lastSyncMessage: 'Google sign-in expired - open the popup and click Sync now to reconnect'
+      });
+      return;
+    }
+
     const folderId = state.folderId || (await getOrCreateFolder(token));
 
     if (state.role === 'master') {

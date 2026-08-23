@@ -10,7 +10,7 @@ Easy Bookmark Sync reads the bookmarks stored in your browser and either uploads
 Your browser's bookmark titles, URLs, and folder structure.
 A Google OAuth access token, used only to talk to the Google Drive API on your behalf.
 Where that data goes
-Bookmark data is sent only to Google Drive, into a folder this extension creates in the Google account you sign in with. It is not sent to [YOUR NAME / PROJECT NAME] or to any server other than Google's. There is no analytics, tracking, or advertising code in this extension.
+Bookmark data is sent only to Google Drive, into a folder this extension creates in the Google account you sign in with. It is not sent to the extension creator, third party, or to any server other than Google's. There is no analytics, tracking, or advertising code in this extension.
 
 <h3>Scope of Google access</h3>
 This extension requests the drive.file Google Drive scope, which only allows it to see and modify files and folders it creates itself - not your wider Google Drive.

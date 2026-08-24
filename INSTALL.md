@@ -56,7 +56,8 @@ right click the toolbar icon → Options → "View full setup instructions".)
    per line) - they're fixed permanently now, tied to the published
    listings, so this step won't need revisiting later:<br><br>
    `https://ohgafdieafmgfcahebkcbnpbnjopglfp.chromiumapp.org/` (Chrome Web Store)<br>
-   `https://iplgoihgbngdhmcbacjakppljbeepchk.chromiumapp.org/` (Edge Add-ons)<br><br>
+   `https://iplgoihgbngdhmcbacjakppljbeepchk.chromiumapp.org/` (Edge Add-ons)<br>
+   `https://1dbba077862f3a0e4781d873ee0b7bdc66670fb4.extensions.allizom.org/` (Firefox)<br><br>
    Add both now even if you're only using one browser today - it saves
    coming back to add the other one later. (If you're loading the
    extension unpacked in Developer mode instead of installing it from a

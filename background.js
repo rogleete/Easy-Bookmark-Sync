@@ -1,4 +1,12 @@
-importScripts('config.js');
+// Chrome/Edge load this as a service worker, where importScripts is how a
+// second file gets pulled in. Firefox runs this as a plain background
+// script instead (no service worker support), and already loads config.js
+// as its own separate entry via the manifest's "scripts" array - calling
+// importScripts there would throw, since it doesn't exist outside a
+// service worker. Guarding it lets the same file work in both.
+if (typeof importScripts === 'function') {
+  importScripts('config.js');
+}
 
 // Everything the extension needs to remember lives in chrome.storage.local.
 // Keeping it local (not storage.sync) on purpose - the role of "master" or
@@ -342,11 +350,39 @@ function serializeNode(node) {
   return out;
 }
 
+// Chrome/Edge and Firefox both expose a handful of special top-level
+// bookmark folders (toolbar, "other"/unfiled, mobile, and on Firefox a
+// menu folder too), but they don't agree on the order those show up in,
+// and Firefox has one more of them than Chromium does. Each browser does
+// give these folders the same fixed internal id every time, though, so
+// using that instead of raw position is what makes a folder actually
+// mean the same thing on both ends instead of just "whatever's third".
+function detectFolderRole(node) {
+  const id = node.id;
+  // Chromium (Chrome, Edge)
+  if (id === '1') return 'toolbar';
+  if (id === '2') return 'other';
+  if (id === '3') return 'mobile';
+  // Firefox
+  if (id === 'toolbar_____') return 'toolbar';
+  if (id === 'menu________') return 'menu';
+  if (id === 'unfiled_____') return 'other';
+  if (id === 'mobile______') return 'mobile';
+  return null;
+}
+
 async function getSerializedTree() {
   const roots = await chrome.bookmarks.getTree();
   // roots[0] is the invisible root node, its children are the actual
-  // top level folders (Bookmarks Bar, Other Bookmarks, Mobile Bookmarks).
-  return roots[0].children.map(serializeNode);
+  // top level folders (Bookmarks Bar/Toolbar, Other Bookmarks, etc).
+  return roots[0].children.map((node) => {
+    const serialized = serializeNode(node);
+    const role = detectFolderRole(node);
+    if (role) {
+      serialized.role = role;
+    }
+    return serialized;
+  });
 }
 
 function countUrls(nodes) {
@@ -377,35 +413,67 @@ async function createSubtree(parentId, node) {
   return synced;
 }
 
+// wipes a single local top-level folder's children and rebuilds them from
+// the matching incoming folder, returning how many bookmarks were created
+async function applyFolderContents(localFolder, incomingFolder) {
+  if (localFolder.children) {
+    for (const child of localFolder.children) {
+      await chrome.bookmarks.removeTree(child.id);
+    }
+  }
+  let synced = 0;
+  if (incomingFolder.children) {
+    for (const child of incomingFolder.children) {
+      synced += await createSubtree(localFolder.id, child);
+    }
+  }
+  return synced;
+}
+
 // Wipes out the children of each top level folder and rebuilds them from
 // the JSON pulled down from Drive. The top level folders themselves
-// (Bookmarks Bar, Other Bookmarks, etc) are special nodes Chrome/Edge
-// manage - you can't delete or create new ones, only match up to what's
-// already there, matched by position since the display names can differ
-// between browsers.
+// (Bookmarks Bar, Other Bookmarks, etc) are special nodes the browser
+// manages - you can't delete or create new ones, only match up to what's
+// already there. Matching is done by each folder's role (toolbar, other,
+// mobile, menu) rather than raw position, so a Chrome master and a
+// Firefox destination (which order and count these folders differently)
+// still land bookmarks in the folder that actually corresponds, instead
+// of just whichever one happens to be in the same list position.
 async function restoreSerializedTree(serializedRoots) {
   const localRoots = await chrome.bookmarks.getTree();
   const localTopLevel = localRoots[0].children;
   let synced = 0;
   const total = countUrls(serializedRoots);
 
-  const limit = Math.min(localTopLevel.length, serializedRoots.length);
-  for (let i = 0; i < limit; i++) {
-    const localFolder = localTopLevel[i];
-    const incomingFolder = serializedRoots[i];
-
-    // clear out whatever is currently there
-    if (localFolder.children) {
-      for (const child of localFolder.children) {
-        await chrome.bookmarks.removeTree(child.id);
-      }
+  const localByRole = {};
+  for (const node of localTopLevel) {
+    const role = detectFolderRole(node);
+    if (role) {
+      localByRole[role] = node;
     }
+  }
 
-    if (incomingFolder.children) {
-      for (const child of incomingFolder.children) {
-        synced += await createSubtree(localFolder.id, child);
-      }
+  const usedLocalIds = new Set();
+  const unmatchedIncoming = [];
+
+  for (const incoming of serializedRoots) {
+    const target = incoming.role ? localByRole[incoming.role] : null;
+    if (target) {
+      synced += await applyFolderContents(target, incoming);
+      usedLocalIds.add(target.id);
+    } else {
+      // no role tag (an older backup made before this existed) or this
+      // browser doesn't have a folder for that role (e.g. Firefox's menu
+      // folder has no Chrome/Edge equivalent) - fall back to matching
+      // whatever local folders are left over, by position, same as before
+      unmatchedIncoming.push(incoming);
     }
+  }
+
+  const leftoverLocal = localTopLevel.filter((node) => !usedLocalIds.has(node.id));
+  const fallbackLimit = Math.min(leftoverLocal.length, unmatchedIncoming.length);
+  for (let i = 0; i < fallbackLimit; i++) {
+    synced += await applyFolderContents(leftoverLocal[i], unmatchedIncoming[i]);
   }
 
   return { synced, total };

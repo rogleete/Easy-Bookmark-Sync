@@ -64,6 +64,7 @@ Options page.
    listings, so this step won't need revisiting later:
    - `https://ohgafdieafmgfcahebkcbnpbnjopglfp.chromiumapp.org/` (Chrome Web Store)
    - `https://iplgoihgbngdhmcbacjakppljbeepchk.chromiumapp.org/` (Edge Add-ons)
+   - `https://1dbba077862f3a0e4781d873ee0b7bdc66670fb4.extensions.allizom.org/` (Firefox)
 
    Add both now even if you're only using one browser today. (If you're
    loading the extension unpacked in Developer mode instead of installing

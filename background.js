@@ -21,8 +21,34 @@ const DEFAULT_STATE = {
   backupsFolderId: null
 };
 
-let isSyncing = false;
 let debounceTimer = null;
+
+// a plain in-memory flag doesn't survive the service worker being killed
+// and restarted (which Chrome does after ~30s idle) - if that happened
+// mid-sync, a second trigger could start overlapping with one still in
+// flight and cause duplicate bookmarks. persisting the lock in storage
+// with a timestamp survives restarts; the staleness check keeps a crashed
+// run from wedging things shut forever.
+const SYNC_LOCK_STALE_MS = 3 * 60 * 1000;
+
+async function acquireSyncLock() {
+  const { syncLock } = await chrome.storage.local.get('syncLock');
+  const now = Date.now();
+  if (syncLock && now - syncLock < SYNC_LOCK_STALE_MS) {
+    return false;
+  }
+  await chrome.storage.local.set({ syncLock: now });
+  return true;
+}
+
+async function releaseSyncLock() {
+  await chrome.storage.local.remove('syncLock');
+}
+
+async function isSyncLocked() {
+  const { syncLock } = await chrome.storage.local.get('syncLock');
+  return Boolean(syncLock && Date.now() - syncLock < SYNC_LOCK_STALE_MS);
+}
 
 // ---------- storage helpers ----------
 
@@ -395,10 +421,9 @@ async function updateStatus(patch) {
 }
 
 async function performSync(reason) {
-  if (isSyncing) {
+  if (!(await acquireSyncLock())) {
     return;
   }
-  isSyncing = true;
   const state = await getState();
 
   // only a user directly clicking "Sync now" (or Connect, which goes
@@ -483,7 +508,7 @@ async function performSync(reason) {
   } catch (err) {
     await updateStatus({ status: 'error', lastSyncMessage: `Sync failed: ${err.message}` });
   } finally {
-    isSyncing = false;
+    await releaseSyncLock();
   }
 }
 
@@ -515,7 +540,7 @@ function scheduleDebouncedSync() {
 }
 
 async function handleBookmarkEvent() {
-  if (isSyncing) {
+  if (await isSyncLocked()) {
     return;
   }
   const state = await getState();
@@ -599,11 +624,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         break;
       }
       case 'createBackup': {
-        if (isSyncing) {
+        if (!(await acquireSyncLock())) {
           sendResponse({ ok: false, error: 'A sync is currently in progress - try again in a moment' });
           break;
         }
-        isSyncing = true;
         try {
           const token = await getValidToken(true);
           const backup = await createBackupFile(token);
@@ -611,12 +635,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         } catch (err) {
           sendResponse({ ok: false, error: err.message });
         } finally {
-          isSyncing = false;
+          await releaseSyncLock();
         }
         break;
       }
       case 'restoreBackup': {
-        if (isSyncing) {
+        if (await isSyncLocked()) {
           sendResponse({ ok: false, error: 'A sync is currently in progress - try again in a moment' });
           break;
         }
@@ -625,7 +649,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           sendResponse({ ok: false, error: 'Restoring a backup is only available on the Master Sync Source browser' });
           break;
         }
-        isSyncing = true;
+        if (!(await acquireSyncLock())) {
+          sendResponse({ ok: false, error: 'A sync is currently in progress - try again in a moment' });
+          break;
+        }
         try {
           const token = await getValidToken(true);
           const result = await restoreBackupFile(token, message.fileId);
@@ -633,7 +660,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         } catch (err) {
           sendResponse({ ok: false, error: err.message });
         } finally {
-          isSyncing = false;
+          await releaseSyncLock();
         }
         break;
       }

@@ -52,21 +52,21 @@ right click the toolbar icon → Options → "View full setup instructions".)
 2. Application type: **Web application** (not "Chrome Extension" - that
    older client type isn't needed).<br><br>
    <img width="650" height="1119" alt="install14-clientid" src="https://github.com/user-attachments/assets/3eefe644-78fc-4af0-97bd-b0dbfeddd58f" /><br>
-3. Under **Authorized redirect URIs**, add both of these exact URIs (one
-   per line) - they're fixed permanently now, tied to the published
+3. Under **Authorized redirect URIs**, add all three of these exact URIs
+   (one per line) - they're fixed permanently now, tied to the published
    listings, so this step won't need revisiting later:<br><br>
    `https://ohgafdieafmgfcahebkcbnpbnjopglfp.chromiumapp.org/` (Chrome Web Store)<br>
    `https://iplgoihgbngdhmcbacjakppljbeepchk.chromiumapp.org/` (Edge Add-ons)<br>
    `https://1dbba077862f3a0e4781d873ee0b7bdc66670fb4.extensions.allizom.org/` (Firefox)<br><br>
-   Add both now even if you're only using one browser today - it saves
-   coming back to add the other one later. (If you're loading the
+   Add all three now even if you're only using one browser today - it
+   saves coming back to add the others later. (If you're loading the
    extension unpacked in Developer mode instead of installing it from a
    store, its ID - and redirect URI - will be different; the extension's
    Options page always shows the exact one to use for whatever copy
    you're running.)
-4. One Client ID can hold multiple redirect URIs, so both of the above
-   (plus any unpacked dev ID) can live on this same OAuth client - no need
-   for separate Client IDs per browser.
+4. One Client ID can hold multiple redirect URIs, so all three of the
+   above (plus any unpacked dev ID) can live on this same OAuth client -
+   no need for separate Client IDs per browser.
 5. Save, then copy both the Client ID (ends in `.apps.googleusercontent.com`)
    and the Client Secret (starts with `GOCSPX-`) Google generated
    alongside it - both get pasted into the extension's Options page. Save both these keys in a password manager or someplace you can reference them easily for future installs and setting up on other computers/browsers.<br><br>
@@ -115,14 +115,16 @@ addons.mozilla.org.
 
 ## Part 6: First run
 
+**If you want one computer to be the "real" copy (Master / Destination):**
+
 Do this on your **master** computer first (the one with the bookmarks you
 already have):
 
 1. Click the extension icon.
 2. Check **Master Sync Source**.
 3. Click **Connect Google Account** and approve access.
-4. It creates an `EasyBookmarkSync` folder in Drive and does an initial
-   upload.
+4. It creates an `EasyBookmarkSync` folder in Drive, takes an automatic
+   "Initial Backup" as a safety net, and does an initial upload.
 
 Then on any other computer you want to pull bookmarks down to:
 
@@ -134,6 +136,23 @@ Then on any other computer you want to pull bookmarks down to:
 4. It pulls down whatever the master last uploaded, replacing local
    bookmarks.
 
+**If you want every computer to stay in sync both ways instead (Merge):**
+
+1. Click the extension icon on each computer you want in the group.
+2. Check **Merge (Two-Way)**.
+3. Click **Connect Google Account**, sign in with the *same* Google
+   account on each one.
+4. The first computer to connect seeds the shared group with its current
+   bookmarks. Every computer after that takes a "Pre-Merge Backup" first,
+   then joins by matching what it already has against the group - exact
+   matches merge together quietly, and anything that's the same bookmark
+   but filed or titled differently on each side shows up in the popup's
+   Conflicts tab for you to resolve once.
+
+From then on, any change on any Merge computer - adding, editing, moving,
+or deleting a bookmark or folder - shows up on the others on their next
+sync.
+
 ## How syncing behaves
 
 - **Master, Realtime**: a bookmark change triggers a sync a few seconds
@@ -141,7 +160,16 @@ Then on any other computer you want to pull bookmarks down to:
 - **Destination, Realtime**: checks the cloud roughly once a minute - true
   instant push needs a server watching for changes, this is the closest
   practical equivalent.
-- Every sync fully replaces the target, no merging.
+- **Master/Destination**: every sync fully replaces the target, no
+  merging.
+- **Merge**: every sync compares what changed locally against what's
+  changed in the shared file since this device's last sync, then applies
+  whichever side is genuinely new on each individual bookmark or folder.
+  Deletions are tracked (not just a disappearance), so a computer that
+  hasn't synced in a while won't bring something back that was deleted
+  elsewhere. If the same item changed on two computers before either
+  synced, it's held back and shown in the popup's Conflicts tab instead
+  of guessing which side should win.
 - Only asks for permission to see files it creates in Drive
   (`drive.file` scope), not your whole Drive.
 
@@ -153,16 +181,46 @@ the popup to open a page where you can:
 - Click **Generate a separate Backup** to save a timestamped snapshot of
   every bookmark in this browser right now, into its own `Backups` folder
   inside `EasyBookmarkSync` - untouched by the regular automatic sync.
-- Browse past backups (date and bookmark count shown for each) and delete
-  individual ones you don't need anymore.
+  Named with this device's label (set on the Options page) so it's easy
+  to tell which computer a backup came from.
+- Browse past backups (name, date, and bookmark count shown for each) and
+  delete individual ones you don't need anymore.
 - Pick one from the dropdown and click **Restore selected backup** to
-  replace every current local bookmark with that snapshot. This is only
-  available on the **Master Sync Source** browser, and asks for
-  confirmation first since it can't be undone.<br>
+  replace every current local bookmark with that snapshot. This asks for
+  confirmation first since it can't be undone. Available on **Master Sync
+  Source** and **Merge (Two-Way)** - not Destination Sync, since that's
+  just a mirror and would get overwritten by the next pull anyway.
+  Restoring on a Merge device resets that device's sync tracking so it
+  safely re-joins the group on its next sync, same as a brand new device.
+- **Keep at most** sets a retention limit (default 15, editable, or
+  "Unlimited") - the oldest backups auto-prune once you're over it.<br>
   <img width="676" height="680" alt="settings-manualbackup" src="https://github.com/user-attachments/assets/42945640-a62e-43c1-9388-f3ecfaba2f99" />
 
+Two backups also happen automatically, no action needed: an **Initial
+Backup** the very first time you ever connect a Google account, and a
+**Pre-Merge Backup** whenever a device joins an existing Merge group,
+right before it reconciles against what's already there.
 
-## Troubleshooting
+## Merge (Two-Way) extras
+
+Two things only show up in the popup when a device is set to Merge:
+
+- **Conflicts tab** - appears (with a count badge) whenever something
+  changed differently on two computers before they synced. Each entry
+  shows both versions with options to keep one, keep the other, or keep
+  both. The toolbar icon shows an amber dot whenever anything's pending
+  here, ahead of the usual green "synced" dot.
+- **Troubleshooting tab** - has a "Reset merge tracking" button for if
+  this device's sync tracking ever seems off. It doesn't touch or delete
+  any bookmarks - it clears this device's local bookkeeping and has it
+  safely re-join the group on the next sync, the same way a brand new
+  device would.
+
+
+## Troubleshooting setup/sign-in issues
+
+(For Merge sync tracking issues specifically, use the Troubleshooting tab
+inside the extension's popup instead - see above.)
 
 - **Error 400: redirect_uri_mismatch** - the redirect URI on the Options
   page doesn't exactly match one of the Authorized redirect URIs on your

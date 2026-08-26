@@ -51,7 +51,7 @@ right click the toolbar icon → Options → "View full setup instructions".)
 
 2. Application type: **Web application** (not "Chrome Extension" - that
    older client type isn't needed).<br><br>
-   <img width="650" height="1119" alt="install14-clientid" src="https://github.com/user-attachments/assets/3eefe644-78fc-4af0-97bd-b0dbfeddd58f" /><br>
+   
 3. Under **Authorized redirect URIs**, add all three of these exact URIs
    (one per line) - they're fixed permanently now, tied to the published
    listings, so this step won't need revisiting later:<br><br>
@@ -70,7 +70,8 @@ right click the toolbar icon → Options → "View full setup instructions".)
 5. Save, then copy both the Client ID (ends in `.apps.googleusercontent.com`)
    and the Client Secret (starts with `GOCSPX-`) Google generated
    alongside it - both get pasted into the extension's Options page. Save both these keys in a password manager or someplace you can reference them easily for future installs and setting up on other computers/browsers.<br><br>
-<img width="586" height="312" alt="install15-clientidvalue" src="https://github.com/user-attachments/assets/f1752d22-0aff-44c2-98dc-c0c1c44241f0" /><br>
+<img width="605" height="810" alt="setup-oauth" src="https://github.com/user-attachments/assets/3163db62-3c6a-4bcb-8be3-abeaf64c3c77" />
+<br>
 
 ## Part 4: Install the extension
 
@@ -109,9 +110,8 @@ addons.mozilla.org.
 4. Repeat on a second browser if you're using one - same Client ID and
    Secret, since both stores' redirect URIs are already on that OAuth
    client from Part 3.<br><br>
-<img width="373" height="343" alt="install16-menu" src="https://github.com/user-attachments/assets/e461a559-f6cb-40e5-9449-b4ec6fe0e163" /><br>
-<img width="371" height="467" alt="install17-settings" src="https://github.com/user-attachments/assets/bf126b6f-27b0-4c7b-9f38-3d364df39d6e" /><br>
-<img width="679" height="1024" alt="install18-setup" src="https://github.com/user-attachments/assets/eca6f873-3661-43a8-b6b4-99113a7a8d1c" /><br>
+<img width="379" height="394" alt="dropdown1-changesettings" src="https://github.com/user-attachments/assets/ed813cad-a8a0-4017-bbe2-17f2a8c97d07" /><br>
+<img width="628" height="1218" alt="setupoptions" src="https://github.com/user-attachments/assets/7a7e3bc4-83bd-4f21-b401-d76278dfa9b1" /><br>
 
 ## Part 6: First run
 
@@ -121,8 +121,11 @@ Do this on your **master** computer first (the one with the bookmarks you
 already have):
 
 1. Click the extension icon.
-2. Check **Master Sync Source**.
-3. Click **Connect Google Account** and approve access.
+2. Check **Master Sync Source**.<br>
+3. Click **Connect Google Account** and approve access.<br>
+<img width="555" height="601" alt="setup-google-verifyapp" src="https://github.com/user-attachments/assets/34d5f22c-5516-486d-8ce5-eb7f767c0299" /><br>
+<img width="565" height="1014" alt="setup-google-verifyapp-continue" src="https://github.com/user-attachments/assets/c4bb7915-7221-4ad0-81a6-1d5e26bdb784" />
+
 4. It creates an `EasyBookmarkSync` folder in Drive, takes an automatic
    "Initial Backup" as a safety net, and does an initial upload.
 
@@ -139,7 +142,9 @@ Then on any other computer you want to pull bookmarks down to:
 **If you want every computer to stay in sync both ways instead (Merge):**
 
 1. Click the extension icon on each computer you want in the group.
-2. Check **Merge (Two-Way)**.
+2. Check **Merge (Two-Way)**.<br>
+<img width="379" height="648" alt="dropdown4-settings" src="https://github.com/user-attachments/assets/d91516cc-6d83-4542-ad4f-efe81d342b9c" /><br>
+
 3. Click **Connect Google Account**, sign in with the *same* Google
    account on each one.
 4. The first computer to connect seeds the shared group with its current
@@ -193,8 +198,9 @@ the popup to open a page where you can:
   Restoring on a Merge device resets that device's sync tracking so it
   safely re-joins the group on its next sync, same as a brand new device.
 - **Keep at most** sets a retention limit (default 15, editable, or
-  "Unlimited") - the oldest backups auto-prune once you're over it.<br>
-  <img width="676" height="680" alt="settings-manualbackup" src="https://github.com/user-attachments/assets/42945640-a62e-43c1-9388-f3ecfaba2f99" />
+  "Unlimited") - the oldest backups auto-prune once you're over it.<br><br>
+  <img width="664" height="1057" alt="manualbackups" src="https://github.com/user-attachments/assets/99ff2f6d-4452-4245-961c-2c3d89b2dc2f" />
+
 
 Two backups also happen automatically, no action needed: an **Initial
 Backup** the very first time you ever connect a Google account, and a
@@ -209,12 +215,15 @@ Two things only show up in the popup when a device is set to Merge:
   changed differently on two computers before they synced. Each entry
   shows both versions with options to keep one, keep the other, or keep
   both. The toolbar icon shows an amber dot whenever anything's pending
-  here, ahead of the usual green "synced" dot.
+  here, ahead of the usual green "synced" dot.<br>
+  
 - **Troubleshooting tab** - has a "Reset merge tracking" button for if
   this device's sync tracking ever seems off. It doesn't touch or delete
   any bookmarks - it clears this device's local bookkeeping and has it
   safely re-join the group on the next sync, the same way a brand new
-  device would.
+  device would.<br>
+  <img width="379" height="471" alt="dropdown3-troubleshooting" src="https://github.com/user-attachments/assets/bd424c15-5c08-4a63-9ed1-5bbe9483be3e" />
+
 
 
 ## Troubleshooting setup/sign-in issues

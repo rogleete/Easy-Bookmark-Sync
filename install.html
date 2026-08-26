@@ -64,9 +64,6 @@
     <ol start="2">
       <li>Application type: <strong>Web application</strong> (not "Chrome Extension" - that older client type isn't needed).</li>
     </ol>
-    <p class="shots">
-      <img src="https://github.com/user-attachments/assets/3eefe644-78fc-4af0-97bd-b0dbfeddd58f" alt="Create OAuth client ID form">
-    </p>
     <ol start="3">
       <li>
         Under <strong>Authorized redirect URIs</strong>, add all three of
@@ -91,10 +88,10 @@
         the above (plus any unpacked dev ID) can live on this same OAuth
         client - no need for separate Client IDs per browser.
       </li>
-      <li>Save, then copy both the Client ID (ends in <code>.apps.googleusercontent.com</code>) and the Client Secret (starts with <code>GOCSPX-</code>) Google generated alongside it - both get pasted into the extension's Options page.</li>
+      <li>Save, then copy both the Client ID (ends in <code>.apps.googleusercontent.com</code>) and the Client Secret (starts with <code>GOCSPX-</code>) Google generated alongside it - both get pasted into the extension's Options page. Save both these keys in a password manager or someplace you can reference them easily for future installs and setting up on other computers/browsers.</li>
     </ol>
     <p class="shots">
-      <img src="https://github.com/user-attachments/assets/f1752d22-0aff-44c2-98dc-c0c1c44241f0" alt="Copy the Client ID">
+      <img src="https://github.com/user-attachments/assets/3163db62-3c6a-4bcb-8be3-abeaf64c3c77" alt="OAuth client created - Client ID and Client Secret shown">
     </p>
 
     <h2>Part 4: Install the extension</h2>
@@ -117,9 +114,8 @@
       <li>Repeat on a second browser if you're using one - same Client ID and Secret, since both stores' redirect URIs are already on that OAuth client from Part 3.</li>
     </ol>
     <p class="shots">
-      <img src="https://github.com/user-attachments/assets/e461a559-f6cb-40e5-9449-b4ec6fe0e163" alt="Right-click the toolbar icon to find Options">
-      <img src="https://github.com/user-attachments/assets/bf126b6f-27b0-4c7b-9f38-3d364df39d6e" alt="Options menu entry">
-      <img src="https://github.com/user-attachments/assets/29503f09-8a44-421f-ae9c-5afc7e9abf8b" alt="Options page with Client ID field">
+      <img src="https://github.com/user-attachments/assets/ed813cad-a8a0-4017-bbe2-17f2a8c97d07" alt="Right-click the toolbar icon to find Change settings">
+      <img src="https://github.com/user-attachments/assets/7a7e3bc4-83bd-4f21-b401-d76278dfa9b1" alt="Options page with Client ID and Client Secret fields">
     </p>
 
     <h2>Part 6: First run</h2>
@@ -129,6 +125,12 @@
       <li>Click the extension icon in the toolbar.</li>
       <li>Check <strong>Master Sync Source</strong>.</li>
       <li>Click <strong>Connect Google Account</strong> and approve access.</li>
+    </ol>
+    <p class="shots">
+      <img src="https://github.com/user-attachments/assets/34d5f22c-5516-486d-8ce5-eb7f767c0299" alt="Google verify app screen">
+      <img src="https://github.com/user-attachments/assets/c4bb7915-7221-4ad0-81a6-1d5e26bdb784" alt="Google verify app - continue">
+    </p>
+    <ol start="4">
       <li>It creates an <code>EasyBookmarkSync</code> folder in Drive, takes an automatic "Initial Backup" as a safety net, and does an initial upload.</li>
     </ol>
     <p>Then on any other computer you want to pull bookmarks down to:</p>
@@ -143,6 +145,11 @@
     <ol>
       <li>Click the extension icon on each computer you want in the group.</li>
       <li>Check <strong>Merge (Two-Way)</strong>.</li>
+    </ol>
+    <p class="shots">
+      <img src="https://github.com/user-attachments/assets/d91516cc-6d83-4542-ad4f-efe81d342b9c" alt="Merge (Two-Way) checkbox on the setup screen">
+    </p>
+    <ol start="3">
       <li>Click <strong>Connect Google Account</strong>, sign in with the <em>same</em> Google account on each one.</li>
       <li>The first computer to connect seeds the shared group with its current bookmarks. Every computer after that takes a "Pre-Merge Backup" first, then joins by matching what it already has against the group - exact matches merge together quietly, and anything that's the same bookmark but filed or titled differently on each side shows up in the popup's Conflicts tab for you to resolve once.</li>
     </ol>
@@ -170,6 +177,9 @@
       <li><strong>Restore</strong> - pick a backup from the dropdown and restore it, replacing every current local bookmark with that snapshot. This asks for confirmation first since it can't be undone. Available on <strong>Master Sync Source</strong> and <strong>Merge (Two-Way)</strong> - not Destination Sync, since that's just a mirror and would get overwritten by the next pull anyway. Restoring on a Merge device resets that device's sync tracking so it safely re-joins the group on its next sync, same as a brand new device.</li>
       <li><strong>Keep at most</strong> sets a retention limit (default 15, editable, or "Unlimited") - the oldest backups auto-prune once you're over it.</li>
     </ul>
+    <p class="shots">
+      <img src="https://github.com/user-attachments/assets/99ff2f6d-4452-4245-961c-2c3d89b2dc2f" alt="Manual Backups page">
+    </p>
     <p>
       Two backups also happen automatically, no action needed: an
       <strong>Initial Backup</strong> the very first time you ever connect
@@ -184,6 +194,9 @@
       <li><strong>Conflicts tab</strong> - appears (with a count badge) whenever something changed differently on two computers before they synced. Each entry shows both versions with options to keep one, keep the other, or keep both. The toolbar icon shows an amber dot whenever anything's pending here, ahead of the usual green "synced" dot.</li>
       <li><strong>Troubleshooting tab</strong> - has a "Reset merge tracking" button for if this device's sync tracking ever seems off. It doesn't touch or delete any bookmarks - it clears this device's local bookkeeping and has it safely re-join the group on the next sync, the same way a brand new device would.</li>
     </ul>
+    <p class="shots">
+      <img src="https://github.com/user-attachments/assets/bd424c15-5c08-4a63-9ed1-5bbe9483be3e" alt="Troubleshooting tab with the Reset merge tracking button">
+    </p>
 
     <h2>Troubleshooting setup/sign-in issues</h2>
     <p>(For Merge sync tracking issues specifically, use the Troubleshooting tab inside the extension's popup instead - see above.)</p>
